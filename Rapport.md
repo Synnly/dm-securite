@@ -60,3 +60,192 @@ def AjoutUtilisateur() -> None:
     cursor.execute("SELECT * FROM utilisateurs")
     print(cursor.fetchall())
 ```
+
+### 3.
+Voici le code de `Verifer()`:
+```python
+def Verification() -> bool:
+    """
+    Authentifie un utilisateur.
+
+    :return: True si le tuple (nom, mot de passe) entrés correspondent et sont présents dans la BDD, False sinon
+    """
+
+    # Demande du nom
+    demander_name = True
+    while demander_name:
+        nom = input("Entrer votre nom :\n> ")
+        cursor.execute("SELECT name FROM utilisateurs WHERE name='{}'".format(nom))
+
+        # Le nom existe donc sortie de boucle
+        if cursor.fetchone() is not None:
+            break
+
+        print("Le nom n'existe pas")
+
+    # Demande du mot de passe
+    password = input("Entrer votre mot de passe :\n> ")
+
+    # Verification du mot de passe
+    cursor.execute("SELECT * FROM utilisateurs WHERE name='{}' AND password='{}'".format(nom, password))
+    return cursor.fetchone() is not None
+```
+### 4.
+Voici le code de `InsererUtilisateurSHA256()` et `VerificationSHA256()`:
+```python
+def InsererUtilisateurSHA256(nom: str, password: str) -> bool:
+    """
+    Insere un utilisateur avec le mot de passe haché en SHA-256
+    :param nom: Le nom de l'utilisateur
+    :param password: Le mot de passe de l'utilisateur
+    :return: True si l'insertion a réussi, False sinon
+    """
+
+    cursor.execute("SELECT * FROM utilisateurs WHERE name='{}' AND password='{}'".format(nom, password))
+
+    # Un utilisateur avec ce nom existe déjà
+    if cursor.fetchone() is not None:
+        return False
+
+    # Hachage et insertion
+    password_hashed = hashlib.sha256(password.encode('utf-8')).hexdigest()
+    cursor.execute("INSERT INTO utilisateurs VALUES ('{}', '{}')".format(nom, password_hashed))
+
+    return True
+```
+```python
+def VerificationSHA256() -> bool:
+    """
+    Authentifie un utilisateur en utilisant le haché SHA-256 du mot de passe
+
+    :return: True si le tuple (nom, mot de passe) entrés correspondent et sont présents dans la BDD, False sinon
+    """
+
+    # Demande du nom
+    demander_name = True
+    while demander_name:
+        nom = input("Entrer votre nom :\n> ")
+        cursor.execute("SELECT name FROM utilisateurs WHERE name='{}'".format(nom))
+
+        # Le nom existe donc sortie de boucle
+        if cursor.fetchone() is not None:
+            break
+
+        print("Le nom n'existe pas")
+
+    # Demande du mot de passe
+    password = input("Entrer votre mot de passe :\n> ")
+
+    # Verification du mot de passe
+    password_hashed = hashlib.sha256(password.encode('utf-8')).hexdigest()
+    cursor.execute("SELECT * FROM utilisateurs WHERE name='{}' AND password='{}'".format(nom, password_hashed))
+    return cursor.fetchone() is not None
+```
+
+## 5.
+
+Voici le code de `InsererUtilisateurSHA256SelConstant()` et `VerificationSHA256SelConstant()` avec la constante `SEL` définie par `SEL = "CRYPTE"`:
+
+```python
+def InsererUtilisateurSHA256SelConstant(nom: str, password: str) -> bool:
+    """
+    Insere un utilisateur avec le mot de passe haché en SHA-256 et avec un sel constant
+    :param nom: Le nom de l'utilisateur
+    :param password: Le mot de passe de l'utilisateur
+    :return: True si l'insertion a réussi, False sinon
+    """
+    
+    return InsererUtilisateurSHA256(nom, SEL+password)
+```
+
+```python
+def VerificationSHA256SelConstant() -> bool:
+    """
+    Authentifie un utilisateur en utilisant le haché SHA-256 du mot de passe avec un sel constant
+
+    :return: True si le tuple (nom, mot de passe) entrés correspondent et sont présents dans la BDD, False sinon
+    """
+
+    # Demande du nom
+    demander_name = True
+    while demander_name:
+        nom = input("Entrer votre nom :\n> ")
+        cursor.execute("SELECT name FROM utilisateurs WHERE name='{}'".format(nom))
+
+        # Le nom existe donc sortie de boucle
+        if cursor.fetchone() is not None:
+            break
+
+        print("Le nom n'existe pas")
+
+    # Demande du mot de passe
+    password = input("Entrer votre mot de passe :\n> ")
+
+    # Verification du mot de passe
+    password_hashed_salted = SEL + hashlib.sha256(password.encode('utf-8')).hexdigest()
+    cursor.execute("SELECT * FROM utilisateurs WHERE name='{}' AND password='{}'".format(nom, password_hashed_salted))
+    return cursor.fetchone() is not None
+```
+
+### 6.
+En début de programme, on ajoute la ligne :
+```python
+cursor.execute("CREATE TABLE sels (salt TEXT, name TEXT)")
+```
+Voici le code des fonctions `InsererUtilisateurSHA256SelAleatoire()`  et `VerificationSHA256SelAleatoire()`:
+```python
+def InsererUtilisateurSHA256SelAleatoire(nom: str, password: str) -> bool:
+    """
+    Insere un utilisateur avec le mot de passe haché en SHA-256 et avec un sel aléatoire
+    :param nom: Le nom de l'utilisateur
+    :param password: Le mot de passe de l'utilisateur
+    :return: True si l'insertion a réussi, False sinon
+    """
+
+    cursor.execute("SELECT * FROM utilisateurs WHERE name='{}' AND password='{}'".format(nom, password))
+
+    # Un utilisateur avec ce nom existe déjà
+    if cursor.fetchone() is not None:
+        return False
+
+    # Hachage, salage et insertion
+    sel = random.randbytes(16).hex()
+    password_hashed_salted = sel + hashlib.sha256(password.encode('utf-8')).hexdigest()
+    cursor.execute("INSERT INTO utilisateurs VALUES ('{}', '{}')".format(nom, password_hashed_salted))
+    cursor.execute("INSERT INTO sels VALUES ('{}', '{}')".format(sel, nom))
+
+    return True
+```
+
+```python
+def VerificationSHA256SelAleatoire() -> bool:
+    """
+    Authentifie un utilisateur en utilisant le haché SHA-256 du mot de passe avec un sel aléatoire
+
+    :return: True si le tuple (nom, mot de passe) entrés correspondent et sont présents dans la BDD, False sinon
+    """
+
+    # Demande du nom
+    demander_name = True
+    while demander_name:
+        nom = input("Entrer votre nom :\n> ")
+        cursor.execute("SELECT name FROM utilisateurs WHERE name='{}'".format(nom))
+
+        # Le nom existe donc sortie de boucle
+        if cursor.fetchone() is not None:
+            break
+
+        print("Le nom n'existe pas")
+
+    # Demande du mot de passe
+    password = input("Entrer votre mot de passe :\n> ")
+
+    # Recuperation du sel
+    cursor.execute("SELECT salt from sels WHERE name='{}'".format(nom))
+    sel = cursor.fetchone()
+
+    # Verification du mot de passe
+    password_hashed_salted = sel + hashlib.sha256(password.encode('utf-8')).hexdigest()
+    cursor.execute("SELECT * FROM utilisateurs u, sels s WHERE s.name = u.name AND u.name='{}' AND password='{}'".format(nom, password_hashed_salted))
+    return cursor.fetchone() is not None
+```
