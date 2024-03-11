@@ -142,7 +142,7 @@ def VerificationSHA256() -> bool:
     return cursor.fetchone() is not None
 ```
 
-## 5.
+### 5.
 
 Voici le code de `InsererUtilisateurSHA256SelConstant()` et `VerificationSHA256SelConstant()` avec la constante `SEL` définie par `SEL = "CRYPTE"`:
 
@@ -249,3 +249,17 @@ def VerificationSHA256SelAleatoire() -> bool:
     cursor.execute("SELECT * FROM utilisateurs u, sels s WHERE s.name = u.name AND u.name='{}' AND password='{}'".format(nom, password_hashed_salted))
     return cursor.fetchone() is not None
 ```
+
+## Exercice 3
+
+### 1.
+L'attaque bruteforce commence à 9h01 (et 24s).
+
+### 2.
+L'attaquant a essayé les extensions `.phtml`, `.php`, `php3`, `php4`, `php5`, `php6`, `php7` et `.phar`.
+
+### 3.
+L'attaquant utilise l'extension `.phar`.
+
+### 4.
+Il récupère une fiche de poste, le renomme, s'octroie les autorisations pour pouvoir exécuter le fichier et l'execute.
