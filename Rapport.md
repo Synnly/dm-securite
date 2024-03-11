@@ -256,10 +256,20 @@ def VerificationSHA256SelAleatoire() -> bool:
 L'attaque bruteforce commence à 9h01 (et 24s).
 
 ### 2.
-L'attaquant a essayé les extensions `.phtml`, `.php`, `php3`, `php4`, `php5`, `php6`, `php7` et `.phar`.
+L'attaquant a essayé les extensions `.phtml`, `.php`, `.php3`, `.php4`, `.php5`, `.php6`, `.php7` et `.phar`.
 
 ### 3.
 L'attaquant utilise l'extension `.phar`.
 
 ### 4.
 Il récupère une fiche de poste, le renomme, s'octroie les autorisations pour pouvoir exécuter le fichier et l'execute.
+
+## Exercice 5
+Les 3 identifiants trouvés sont :
+
+|Login|Mot de passe|
+|-----|------| 
+|insite|2getin|
+|xruser|4$xray|
+|root|#superxr|
+Ces identifiants ont été trouvés grâce au CVE n° CVE-2014-7232.
